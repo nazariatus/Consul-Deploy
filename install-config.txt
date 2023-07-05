@@ -1,0 +1,35 @@
+wget https://releases.hashicorp.com/consul/1.16.0/consul_1.16.0_linux_amd64.zip
+sudo apt install unzip
+unzip consul_1.16.0_linux_amd64.zip
+sudo mv consul /usr/local/bin
+
+
+# make autostart
+sudo nano /etc/systemd/system/consul.service
+
+[Unit]
+Description=Consul
+Documentation=https://www.consul.io/
+
+[Service]
+ExecStart=/usr/local/bin/consul agent -server -ui -data-dir=/tmp/consul -bootstrap-expect=1 -node=vault -enable-script-checks -config-dir=/etc/consul.d
+ExecReload=/usr/local/bin/consul reload
+KillMode=process
+Restart=on-failure
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target
+
+sudo mkdir /etc/consul.d
+sudo nano /etc/consul.d/ui.json
+
+{
+  "addresses": {
+    "http": "0.0.0.0"
+  }
+}
+
+sudo systemctl enable consul.service
+sudo systemctl start consul.service
+sudo systemctl status consul.service
