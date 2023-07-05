@@ -1,0 +1,20 @@
+sudo nano /etc/consul.d/nexus.json
+
+{
+  "service": {
+    "id": "nexus",
+    "name": "nexus",
+    "address": "192.168.0.100",
+    "port": 8081,
+    "checks": [
+      {
+        "id": "http-check",
+        "name": "HTTP Check",
+        "http": "http://192.168.0.100:8081/",
+        "interval": "10s"
+      }
+    ]
+  }
+}
+
+sudo systemctl restart consul
