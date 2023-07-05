@@ -1,10 +1,16 @@
+# Завантажуємо архів Consul
 wget https://releases.hashicorp.com/consul/1.16.0/consul_1.16.0_linux_amd64.zip
+
+# Встановлюємо архіватор
 sudo apt install unzip
+
+# Розпаковуємо архів
 unzip consul_1.16.0_linux_amd64.zip
+
+# Переміщаємо архів а директорію bin
 sudo mv consul /usr/local/bin
 
-
-# make autostart
+# Створюємо службу автозапуску
 sudo nano /etc/systemd/system/consul.service
 
 [Unit]
@@ -21,7 +27,10 @@ LimitNOFILE=65536
 [Install]
 WantedBy=multi-user.target
 
+# створюємо директорію consul.d
 sudo mkdir /etc/consul.d
+
+# Створюємо файл конфігурації, щоб відкрити усі доступи по http
 sudo nano /etc/consul.d/ui.json
 
 {
@@ -30,6 +39,11 @@ sudo nano /etc/consul.d/ui.json
   }
 }
 
+# Додаємо службу в автозапуск
 sudo systemctl enable consul.service
+
+# Запускаємо службу
 sudo systemctl start consul.service
+
+# Перевіряємо статус служби
 sudo systemctl status consul.service
