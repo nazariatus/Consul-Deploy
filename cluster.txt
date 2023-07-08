@@ -91,9 +91,3 @@ sudo systemctl start consul.service
 
 # Перевіряємо статус служби
 sudo systemctl status consul.service
-
-
-
-
-
-

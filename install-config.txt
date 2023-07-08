@@ -39,6 +39,9 @@ sudo nano /etc/consul.d/ui.json
   }
 }
 
+# Пнрнзавантажуємо конфігурацію
+sudo systemctl daemon-reload
+
 # Додаємо службу в автозапуск
 sudo systemctl enable consul.service
 
