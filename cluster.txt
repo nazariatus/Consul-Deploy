@@ -1,0 +1,99 @@
+# Створення кластеру з трьох Consul
+
+# На кожному сервері потрібно встановити Consul
+
+# Завантажуємо архів Consul
+wget https://releases.hashicorp.com/consul/1.16.0/consul_1.16.0_linux_amd64.zip
+
+# Встановлюємо архіватор
+sudo apt install unzip
+
+# Розпаковуємо архів
+unzip consul_1.16.0_linux_amd64.zip
+
+# Переміщаємо архів а директорію bin
+sudo mv consul /usr/local/bin
+
+# Створюємо службу автозапуску (у полі node замість "vault" вказуємо hostname сервера наприклад ip-172-31-44-77)
+sudo nano /etc/systemd/system/consul.service
+
+[Unit]
+Description=Consul
+Documentation=https://www.consul.io/
+
+[Service]
+ExecStart=/usr/local/bin/consul agent -server -ui -data-dir=/tmp/consul -bootstrap-expect=1 -node=vault -enable-script-checks -config-dir=/etc/consul.d
+ExecReload=/usr/local/bin/consul reload
+KillMode=process
+Restart=on-failure
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target
+
+# створюємо директорію consul.d
+sudo mkdir /etc/consul.d
+
+# Створюємо файл конфігурації, щоб відкрити усі доступи по http
+sudo nano /etc/consul.d/ui.json
+
+{
+  "addresses": {
+    "http": "0.0.0.0"
+  }
+}
+
+# Генеруємо ключ до Consul (потрібно згенерувати лише на одному з серверів)
+consul keygen
+
+# Створюємо файл конфігурації, щоб об'єднати три Consul у кластер (даний файл одинаковий для трьох серверів. Ключ Consul потрібно втавляти лише одного серверу наприклад першого)
+sudo nano /etc/consul.d/config.json
+
+{
+     "bind_addr": "0.0.0.0",
+     "bootstrap_expect": 3,
+     "client_addr": "0.0.0.0",
+     "datacenter": "dc1",
+     "data_dir": "/var/lib/consul",
+     "domain": "consul",
+     "enable_script_checks": true,
+     "dns_config": {
+         "enable_truncate": true,
+         "only_passing": true
+     },
+     "enable_syslog": true,
+     "encrypt": "копіюємо сюди згенерований ключ Consul",
+     "leave_on_terminate": true,
+     "log_level": "INFO",
+     "rejoin_after_leave": true,
+     "retry_join": [
+         "пишемо тут hostname першого сервера Consul",
+         "пишемо тут hostname другого сервера Consul",
+         "пишемо тут hostname третього сервера Consul"
+     ],
+     "server": true,
+     "start_join": [
+         "пишемо тут hostname першого сервера Consul",
+         "пишемо тут hostname другого сервера Consul",
+         "пишемо тут hostname третього сервера Consul"
+     ],
+    "ui_config": { "enabled": true }
+}
+
+# Пнрнзавантажуємо конфігурацію
+sudo systemctl daemon-reload
+
+# Додаємо службу в автозапуск
+sudo systemctl enable consul.service
+
+# Запускаємо службу
+sudo systemctl start consul.service
+
+# Перевіряємо статус служби
+sudo systemctl status consul.service
+
+
+
+
+
+
